@@ -1,6 +1,6 @@
 ---
 title: "STAT115 Homework 1"
-author: (your name)
+author: Peter Shen
 date: "`r Sys.Date()`"
 output:
   rmarkdown::pdf_document
@@ -14,57 +14,67 @@ This first question is an introduction to using RStudio and knitting your homewo
 
 **1. Download and install the ape and seqinr packages. Include the installation commands in your R code but make sure the chunk does not get executed when you knit the document for final submission (hint: eval=FALSE).**
 ```{r, eval=FALSE}
-
+install.packages("ape")
+install.packages("seqinr")
 ```
 
 **2. Load the ape and seqinr packages into the current workspace. Hint: library().**
 ```{r}
-
+library(ape)
+library(seqinr)
 ```
 
 **3. Use the read.GenBank() function available in the ape library to read in the following accession number: MF320132. Use the as.character=TRUE option to return the nucleotide sequence. Assign the result to a variable named seq_1. **
 ```{r}
-
+seq_1 <- read.GenBank("MF320132", as.character = T)
 ```
 
 **4. What species do these reads come from? Hint: use the attributes() command to view available attributes for seq_1 and then use the attr() command to access that.**
 ```{r}
-
+attributes(seq_1)
+attr(seq_1, "species")
 ```
+
+The sequence is from Homo sapiens
 
 **5. How long is the nucleotide sequence? Hint: use the length function.**
 ```{r}
-
+length(seq_1$MF320132)
 ```
 
 **6. Report the overall nucleotide counts of the sequence. Hint: you may use the table function.**
 ```{r}
-
+table(seq_1$MF320132)
 ```
 
 **7. Replace the sequence with an edited version in which the "n" nucleotides have been removed. What is the length of the sequence now?**
 ```{r}
-
+seq_1_replaced <- seq_1
+seq_1_replaced$MF320132 <- seq_1$MF320132[seq_1$MF320132!="n"]
 ```
 
 **7. Again report the overall nucleotide counts of the modified sequence but instead convert these counts to proportions. Hint: use the prop.table function. What is the overall GC-content of the sequence (i.e. what proportion of the total sequence is composed of either G or C bases?).**
 ```{r}
-
+length(seq_1_replaced$MF320132)
 ```
 
 **8. Use the set.seed() function to set a seed such that your results may be reproducible (set.seed(12345)). Generate a random uniform vector (over the range 0-1) of length equal to the answer you found in question 5. Call this vector x.random.**
 ```{r}
-
+set.seed(5)
+x.random <- runif(304, min=0, max=1)
 ```
 
 **9. Now create a logical vector indicating whether x.random is less than or equal to 0.5. Call this vector x.logical.**
 ```{r}
-
+x.logical <- sapply(x.random, function(x) {ifelse(x <= 0.5, T, F)})
 ```
 
 **10. Finally print just those nucleotides corresponding to x.logical==TRUE. What is the GC-content of this new sequence?**
 ```{r}
-
+seq_1$MF320132[x.logical]
+tbl <- table(seq_1$MF320132[x.logical])
+gc <- as.numeric((tbl["g"] + tbl["c"])/length(seq_1$MF320132[x.logical]))
+paste0("GC content is ", gc*100, "%")
 ```
 
 # Part II-- Introduction to python
@@ -76,39 +86,45 @@ dna_seq = 'GCGTTTGACCGCGCTTGGGTGGCCTGGGACCCTGTGGGAGGCTTCCCCGGCGCCGAGAGCCCTGGCTGA
 
 protein_seq = 'MGRSRRAEKATGSPVPSPARDRCGKPGGASAGPAERTSEVKSLVYLPLGAGLGPQPLP_'
 
+
 def translate_DNA(sequence):
     start_codon = 'ATG'
     stop_codons = ('TAA', 'TAG', 'TGA')
     codontable = {
-        'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
-        'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
-        'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
-        'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
-        'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
-        'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
-        'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
-        'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
-        'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
-        'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
-        'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
-        'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
-        'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
-        'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
-        'TAC':'Y', 'TAT':'Y', 'TAA':'_', 'TAG':'_',
-        'TGC':'C', 'TGT':'C', 'TGA':'_', 'TGG':'W'
-    }	
-    
+        'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
+        'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACT': 'T',
+        'AAC': 'N', 'AAT': 'N', 'AAA': 'K', 'AAG': 'K',
+        'AGC': 'S', 'AGT': 'S', 'AGA': 'R', 'AGG': 'R',
+        'CTA': 'L', 'CTC': 'L', 'CTG': 'L', 'CTT': 'L',
+        'CCA': 'P', 'CCC': 'P', 'CCG': 'P', 'CCT': 'P',
+        'CAC': 'H', 'CAT': 'H', 'CAA': 'Q', 'CAG': 'Q',
+        'CGA': 'R', 'CGC': 'R', 'CGG': 'R', 'CGT': 'R',
+        'GTA': 'V', 'GTC': 'V', 'GTG': 'V', 'GTT': 'V',
+        'GCA': 'A', 'GCC': 'A', 'GCG': 'A', 'GCT': 'A',
+        'GAC': 'D', 'GAT': 'D', 'GAA': 'E', 'GAG': 'E',
+        'GGA': 'G', 'GGC': 'G', 'GGG': 'G', 'GGT': 'G',
+        'TCA': 'S', 'TCC': 'S', 'TCG': 'S', 'TCT': 'S',
+        'TTC': 'F', 'TTT': 'F', 'TTA': 'L', 'TTG': 'L',
+        'TAC': 'Y', 'TAT': 'Y', 'TAA': '_', 'TAG': '_',
+        'TGC': 'C', 'TGT': 'C', 'TGA': '_', 'TGG': 'W'
+    }
+
     start = sequence.find(start_codon)
-    codons = [] #Create a codon list to store codons generated from coding seq.
-    
-    # for i in range(start, len(sequence), 3):
-      # Finish the loop or write your own code to find the coding sequence which should
-      # start at the first start codon and stop at the occurrence of any stop codon.
-       
-    protein_sequence = ''.join([codontable[codon] for codon in codons]) #Translate condons to protein seq.
+    # Create a codon list to store codons generated from coding seq.
+    codons = []
+
+    for i in range(start, len(sequence), 3):
+        codon = sequence[i:i + 3]
+        if (codon in stop_codons):
+            break
+        else:
+            codons.append(codon)
+            
+    # Translate condons to protein seq.
+    protein_sequence = ''.join([codontable[codon] for codon in codons])
     return "{0}_".format(protein_sequence)
-    
-print(protein_seq)
+
+print(translate_DNA(dna_seq))
 ```
 
 ## Submission
